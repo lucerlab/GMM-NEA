@@ -5,7 +5,7 @@ GMM-NEA
 
 `R` code implementing the methodologies reported in the paper "*Reconstruction of Nuclear Ensemble Approach Electronic Spectra using Probabilistic Machine Learning*" (L. Cerdán and D. Roca-Sanjuán, 2022). 
 It contains a fully functional version of the algorithm to reconstruct the NEA spectra using Kernel Density Estimation (KDE) Silverman's rule of thumb to choose the phenomenological
-bandwidth *d* (auto-*d*) and using Gaussian Mixture Models to avoid *d* altogether(GMM-NEA).
+bandwidth *d* (auto-*d*) and using Gaussian Mixture Models to avoid *d* altogether (GMM-NEA).
 
 ## Requirements and Dependencies
 
@@ -13,7 +13,7 @@ It requires the installation of [R](https://cran.r-project.org/) and/or the [Rst
 
 Before running this script, make sure that the following packages are installed: 
 
-`'stats'`, `'scales'`, `'robustbase'`, `'matrixStats'`, `'mclust'`, `'foreach'`, `'doParallel'`, `'parallel'`
+`'stats'` `'scales'` `'robustbase'` `'matrixStats'` `'mclust'` `'foreach'` `'doParallel'` `'parallel'`
 
 ## Usage
 
@@ -51,8 +51,8 @@ Files 1 and 2 contain the dataset with the computed NEA absorption cross section
 for the whole spectrum (`sigma_cm2_full`) and for each transition (`sigma_cm2_Band_#`), together with their corresponding
 confidence intervals (CI). File 3 is a plot of the NEA spectra computed both with auto-*d* and GMM-NEA (see examples below). The headers in Files 
 1 and 2 summarize the input and the model parameters used to reconstruct the NEA spectra. For auto-*d* (File 1), it includes 
-the empirical bandwidths *d* for each transition. For GMM-NEA (File 2), it includes the number of mixtures and the model constraints
-(*model names*) for each transition. If any outlier is detected, the corresponding geometry/configuration
+the empirical bandwidths *d* for each transition. For GMM-NEA (File 2), it includes the number of mixtures (*K*) and the model constraints
+(*M*) for each transition. If any outlier is detected, the corresponding geometry/configuration
 is stated as well in the header (*Skipped geometries (outliers)*).
 
 #### Examples: 
