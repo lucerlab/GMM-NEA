@@ -7,7 +7,7 @@ GMM-NEA
 It contains a fully functional version of the algorithm to reconstruct the NEA spectra using Kernel Density Estimation (KDE) Silverman's rule of thumb to choose the phenomenological
 bandwidth *d* (auto-*d*) and using Gaussian Mixture Models to avoid *d* altogether (GMM-NEA).
 
-<img src="figures/TOC.jpg" width="450"/>
+<img src="figures/TOC.jpg" width="400"/>
 
 ## Requirements and Dependencies
 
