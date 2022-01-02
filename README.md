@@ -28,14 +28,14 @@ An example of this kind of file can be found in the folder `Data`.
 3) Access a terminal (OS or RStudio), go to the folder containing the source files, and type:
 
 ```
-$ Rscript GMM_NEA.R input_file molecule [outliers] [ci]
+$ Rscript GMM_NEA.R input_file molecule [no_outliers] [ci]
 ```
 
 The argument `input_file` specifies the name of the `.csv` file containing the *VEE* and *f* values.
 
 The argument `molecule` specifies the molecule name/identifier to add to the output files
 
-The *optional* argument `outliers` specifies the program to find and remove posible outliers.
+The *optional* argument `no_outliers` specifies the program to ignore outliers.
 
 The *optional* argument `ci` tells the program to compute the confidence intervals (CI) of the NEA spectrum.
 
@@ -60,13 +60,13 @@ is stated as well in the header (*Skipped geometries (outliers)*).
 #### Examples: 
 
 ```
-$ Rscript GMM_NEA.R vee_f_uracil_radical.csv U6OH outliers ci
+$ Rscript GMM_NEA.R vee_f_uracil_radical.csv U6OH ci
 ```
 
 <img src="figures/Spectra_eV_auto_d_vs_GMM_NEA_100_geoms_U6OH.png" width="400"/>
 
 ```
-$ Rscript GMM_NEA.R vee_f_benzene.csv benzene_no_ci
+$ Rscript GMM_NEA.R vee_f_benzene.csv benzene_no_ci no_outliers
 ```
 
 <img src="figures/Spectra_eV_auto_d_vs_GMM_NEA_250_geoms_benzene_no_ci.png" width="400"/>
