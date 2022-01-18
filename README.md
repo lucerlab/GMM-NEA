@@ -57,6 +57,8 @@ the empirical bandwidths *d* for each transition. For GMM-NEA (File 2), it inclu
 (*M*) for each transition. If any outlier is detected, the corresponding geometry/configuration
 is stated as well in the header (*Skipped geometries (outliers)*).
 
+A sample of Files 1 and 2 can be found in the folder `Data`.
+
 #### Examples: 
 
 ```
