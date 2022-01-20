@@ -11,7 +11,7 @@ bandwidth *d* (auto-*d*) and using Gaussian Mixture Models to avoid *d* altogeth
 
 ## Requirements and Dependencies
 
-It requires the installation of [R](https://cran.r-project.org/) and/or the [Rstudio IDE](https://www.rstudio.com/products/rstudio/).
+It requires the installation of [R](https://cran.r-project.org/) (and optionally the [Rstudio IDE](https://www.rstudio.com/products/rstudio/)).
 
 Before running this script, make sure that the following packages are installed: 
 
@@ -22,7 +22,7 @@ Before running this script, make sure that the following packages are installed:
 1) Save the source files `GMM_NEA.R` and `GMM_NEA_helper_funcs.R` into a folder. 
 
 2) Into that same folder save the `.csv` file containing the values of the vertical excitation energies (*VEE*) and oscillator strengths (*f*) 
-for all transitions (columns) and geometries/configurations (rows) to reconstruct the NEA spectrum. The first half of the columns contain the *VEE*, the second half the *f*s. 
+for all transitions (columns) and geometries/configurations (rows) to reconstruct the NEA spectrum. The first half of the columns contain the *VEE*, the second half the *f*. 
 An example of this kind of file can be found in the folder `Data`.
 
 3) Access a terminal (OS or RStudio), go to the folder containing the source files, and type:
