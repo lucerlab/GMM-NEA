@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 
+# Author: Luis Cerdán <lcerdanphd_at_gmail.com>
+#                     <https://github.com/lucerlab>
+
 #######################################################################
 #######################################################################
 #####                                                             #####
@@ -12,17 +15,18 @@
 ###########     STORE ARGUMENTS PASSED FROM TERMINAL     ##############
 #######################################################################
 
-# terminal example: Rscript GMM_NEA.R target_uracile.csv U6OH outliers ci
+# terminal example: Rscript GMM_NEA.R "uracil radical" vee_f_uracil_radical.csv U6OH outliers ci
 args <- commandArgs(trailingOnly=TRUE)
 
 # test if all needed arguments are passed: if not, return an error
-if (length(args)==1) {
-  stop("At least two argument must be supplied (input file, output name).", call.=FALSE)
+if (length(args)<3) {
+  stop("At least three arguments must be supplied (input folder, input file, output name).", call.=FALSE)
 } 
 
 # store input file name and molecule name
-input_file <- args[1]
-molecule <- args[2]
+input_folder <- args[1]
+input_file <- args[2]
+molecule <- args[3]
 
 # by default, outliers are computed, confidence intervals are NOT
 outliers <- TRUE
@@ -100,7 +104,7 @@ parallel::clusterExport(my.cluster, c('weighted.IQR','auto_d','band_gen','band_g
 ######################################################################
 
 # Load full QM dataset
-df_tr = read.csv(input_file, sep = ",", dec = ".", comment.char = "#", na.strings=c("","NA"))
+df_tr = read.csv(paste(input_folder, '/', input_file, sep = ''), sep = ",", dec = ".", comment.char = "#", na.strings=c("","NA"))
 
 # store number of states (transitions)
 n_states <- ncol(df_tr)/2
@@ -182,7 +186,7 @@ save_sigma_eV_auto(sigma_auto_d,n_geoms,d_opt,outlier_geoms)
 save_sigma_eV_gmm(sigma_gmm,n_geoms,gmm_model_opt,gmm_k_opt,outlier_geoms)
 
 # save plot
-png(paste(molecule,'/Spectra_eV_auto_d_vs_GMM_NEA_',n_geoms,'_geoms_', molecule,'.png', sep = ''),
+png(paste(input_folder,'/Spectra_eV_auto_d_vs_GMM_NEA_',n_geoms,'_geoms_', molecule,'.png', sep = ''),
     width = 8.5, height = 6,
     units = 'in',
     res = 300)

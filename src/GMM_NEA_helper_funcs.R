@@ -1,3 +1,7 @@
+
+# Author: Luis Cerdán <lcerdanphd_at_gmail.com>
+#                     <https://github.com/lucerlab>
+
 #######################################################################
 #######################################################################
 #####                                                             #####
@@ -481,8 +485,8 @@ gmm_nea_spectra <- function(df,E,ci){
 
 save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms){
   # make directory to store results if doesn't exist
-  outputDIR <- molecule
-  if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
+  outputDIR <- input_folder
+  #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
   # set output file name
   file_name <- paste(outputDIR,'/auto_d_spectra_eV_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
   # set file header
@@ -505,8 +509,8 @@ save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms){
 
 save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms){
   # make directory to store results if it doesn't exist
-  outputDIR <- molecule
-  if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
+  outputDIR <- input_folder
+  #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
   # set output file name
   file_name <- paste(outputDIR,'/GMM_NEA_spectra_eV_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
   # set file header
