@@ -21,27 +21,30 @@ Before running this script, make sure that the following packages are installed:
 
 1) Save the source files `GMM_NEA.R` and `GMM_NEA_helper_funcs.R` into a folder. 
 
-2) Into that same folder save the `.csv` file containing the values of the vertical excitation energies (*VEE*) and oscillator strengths (*f*) 
-for all transitions (columns) and geometries/configurations (rows) to reconstruct the NEA spectrum. The first half of the columns contain the *VEE*, the second half the *f*. 
+2) Generate a `.csv` file containing the values of the vertical excitation energies (*VEE*) and oscillator strengths (*f*) 
+for all transitions/states (columns) and geometries/configurations (rows) to reconstruct the NEA spectrum. The first half of the columns contain the *VEE*, the second half the *f*. 
 An example of this kind of file can be found in the folder `Data`.
 
 3) Access a terminal (OS or RStudio), go to the folder containing the source files, and type:
 
 ```
-$ Rscript GMM_NEA.R input_file molecule [no_outliers] [ci]
+$ Rscript GMM_NEA.R input_folder input_file molecule [no_outliers] [ci]
 ```
 
-The argument `input_file` specifies the name of the `.csv` file containing the *VEE* and *f* values.
+The argument `input_folder` specifies the absolute or relative path of the folder containing the `.csv` file with the *VEE* and *f* values. 
+If the path contains spaces, use quotations (`"` or `'`) to enclose the path. Example: `'home/results/folder with spaces'`.
 
-The argument `molecule` specifies the molecule name/identifier to add to the output files
+The argument `input_file` specifies the name of the `.csv` file with the *VEE* and *f* values.
 
-The *optional* argument `no_outliers` specifies the program to ignore outliers.
+The argument `molecule` specifies the molecule name/identifier to add to the output files. If spaces in the molecule name are desired, enclose it with quotations (`"` or `'`).
 
-The *optional* argument `ci` tells the program to compute the confidence intervals (CI) of the NEA spectrum.
+The *optional* argument `no_outliers` informs the program to ignore outliers.
+
+The *optional* argument `ci` informs the program to compute the confidence intervals (CI) of the NEA spectrum.
 
 #### Output
 
-Once the computation is over, the following files are saved into the folder `./molecule`:
+Once the computation is over, the following files are saved into the folder `input_folder`:
 
 1. auto_d_spectra_eV_*n_geoms*_*molecule*.csv
 
@@ -62,13 +65,13 @@ A sample of Files 1 and 2 can be found in the folder `Data`.
 #### Examples: 
 
 ```
-$ Rscript GMM_NEA.R vee_f_uracil_radical.csv U6OH ci
+$ Rscript GMM_NEA.R 'results/uracil radical CASPT2' vee_f_uracil_radical_100_geoms.csv U6OH ci
 ```
 
 <img src="figures/Spectra_eV_auto_d_vs_GMM_NEA_100_geoms_U6OH.png" width="400"/>
 
 ```
-$ Rscript GMM_NEA.R vee_f_benzene.csv benzene_no_ci no_outliers
+$ Rscript GMM_NEA.R results/benzene_td-dft vee_f_benzene.csv benzene_no_ci
 ```
 
 <img src="figures/Spectra_eV_auto_d_vs_GMM_NEA_250_geoms_benzene_no_ci.png" width="400"/>
