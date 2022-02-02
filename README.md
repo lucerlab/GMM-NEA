@@ -37,7 +37,7 @@ $ chmod +x GMM_NEA.R
 
 3) Save files `GMM_NEA.R` (now an executable) and `GMM_NEA_helper_funcs.R` into the directory of your choice (usualy where binaries are saved)
 
-Before step 2) you may want to change the shebang line `#!/usr/bin/Rscript` to specify where your `Rscipt` binary is, 
+Before step 2) you may want to change the shebang line `#!/usr/bin/Rscript` to specify where your `Rscript` binary is, 
 as well as changing in `GMM_NEA.R` (line 52):
 
 ```
@@ -61,11 +61,7 @@ geometries/configurations, finds possible outliers, computes the optimal linewid
 and reconstructs the GMM-NEA spectrum, and finally generates files with the generated spectra and information about the model hyperparameters. To alleviate the computational burden,
 this implementation uses multi-threading parallelization.
 
-The current implementation of GMM-NEA uses the command line parser `optparse` (inspired by Python's one) to pass arguments to the code. To check the options, type:
-
-```
-GMM_NEA.R -h
-```
+The current implementation of GMM-NEA uses the command line parser `optparse` (inspired by Python's one) to pass arguments to the code. The options are:
 
 - The argument `-f` (or `--file`) specifies the name of the `.csv` file with the *VEE* and *f* values.
 
@@ -126,7 +122,7 @@ This last line might have to be changed depending on your installation. In case 
 2) To execute the program, run:
 
 ```
-$ GMM_NEA.R -p path_to_input_file -f input_file [plus options]
+$ GMM_NEA.R -f input_file [plus options]
 ```
 
 #### Before running the script (non-executable)
@@ -134,7 +130,7 @@ $ GMM_NEA.R -p path_to_input_file -f input_file [plus options]
 1) Open a terminal (OS or RStudio), go to the folder containing the source files, and run:
 
 ```
-$ Rscript GMM_NEA.R -p path_to_input_file -f input_file [plus options]
+$ Rscript GMM_NEA.R -f input_file [plus options]
 ```
 
 If using Linux, the paths to `Rscript` binary and `R` libraries must be exported first:
