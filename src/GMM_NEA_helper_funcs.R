@@ -174,28 +174,33 @@ band_gen <- function(VEE, f, E, ci){
   for(ii in 1:confs){
     abs_cross <- abs_cross + factor*f[ii]*VEE[ii]/E*exp(-2*(E-VEE[ii])^2/d^2)
   }
-
+  
   # bootstrap to find band CI
   if(ci){
     n_boot <- 999
     spec_boot <- matrix(0, nrow = n_boot, ncol = length(E)) # matrix to store bootstrapped bands
     for(bb in 1:n_boot){
-     id_boot <- sample(confs, replace = TRUE) # randomly sample conf observations with replacement
-     f_boot <- f[id_boot]
-     VEE_boot <- VEE[id_boot]
-     for(ii in 1:confs){ # compute spectrum
-       spec_boot[bb,] <- spec_boot[bb,] + factor*f_boot[ii]*VEE_boot[ii]/E*exp(-2*(E-VEE_boot[ii])^2/d^2)
-     }
+      id_boot <- sample(confs, replace = TRUE) # randomly sample conf observations with replacement
+      f_boot <- f[id_boot]
+      VEE_boot <- VEE[id_boot]
+      for(ii in 1:confs){ # compute spectrum
+        spec_boot[bb,] <- spec_boot[bb,] + factor*f_boot[ii]*VEE_boot[ii]/E*exp(-2*(E-VEE_boot[ii])^2/d^2)
+      }
     }
     
-    # compute CI (eq. 4 in publication)
-    abs_cross_ci <- qt(0.025, n_boot, lower.tail = FALSE)*matrixStats::colSds(spec_boot)
+    # compute lower and upper bound errors (95% CI) by taking quantiles (0.025, 0.975)
+    # and subtracting original mean
+    abs_cross_lci <- matrixStats::colQuantiles(spec_boot, probs = 0.025)
+    abs_cross_lci <- abs(abs_cross_lci - abs_cross)
+    abs_cross_uci <- matrixStats::colQuantiles(spec_boot, probs = 0.975)
+    abs_cross_uci <- abs(abs_cross_uci - abs_cross)
   } else{
-    abs_cross_ci <- rep(0,length(E))
+    abs_cross_lci <- rep(0,length(E))
+    abs_cross_uci <- rep(0,length(E))
   }
   
-  # return band spectrum, band error, and empirical d
-  return(list(abs_cross,abs_cross_ci,d))
+  # return band spectrum, band errors, and empirical d
+  return(list(abs_cross,abs_cross_lci,abs_cross_uci,d))
 }
 
 
@@ -207,9 +212,11 @@ auto_d_spectra <- function(df,E,ci){
   # ci: If true, computes confidence intervals
   ## Ouput:
   # bands: dataframe with band cross section spectrum
-  # bands_std: dataframe with band cross section spectrum standard deviation
-  # spec: array with full cross section spectrum
-  # spec_std: array with full cross section spectrum standard deviation
+  # bands_lci: dataframe with band cross section spectrum lower confidence interval
+  # bands_uci: dataframe with band cross section spectrum upper confidence interval
+  # abs_cross: array with full cross section spectrum
+  # abs_cross_lci: array with full cross section spectrum lower confidence interval
+  # abs_cross_uci: array with full cross section spectrum upper confidence interval
   # d: array with optimized empirical linewidths
   
   # store number of transitions/bands/states and confs
@@ -223,22 +230,24 @@ auto_d_spectra <- function(df,E,ci){
   ) %dopar% {
     band_tmp <- band_gen(df[,ii],df[,(ii+n_states)], E, ci)
     # merge to avoid list of lists
-    c(band_tmp[[1]],band_tmp[[2]],band_tmp[[3]])
+    c(band_tmp[[1]],band_tmp[[2]],band_tmp[[3]],band_tmp[[4]])
   }
   
   # separate bands from bandwidth
   n_rows <- nrow(band_par)
-  bands <- band_par[1:((n_rows-1)/2),] # band cross section spectrum
-  bands_ci <- band_par[((n_rows-1)/2+1):(n_rows-1),] # band cross section spectrum CI
+  
+  bands <- band_par[1:length(E),] # band cross section spectrum
+  bands_lci <- band_par[(length(E)+1):(2*length(E)),] # band cross section spectrum CI
+  bands_uci <- band_par[(2*length(E)+1):(3*length(E)),] # band cross section spectrum CI
   d_opt <- band_par[n_rows,] # array with auto-d linewidths
   
   # generate full spectrum by adding up all bands contributions
   abs_cross <- rowSums(bands) # eq. 3 in publication
-  abs_cross_ci <- sqrt(rowSums(bands_ci^2)) # eq. 5 in publication
-
-  # return bands spectra and errors, full spectrum and errors, and linewidths
-  return(list(bands, bands_ci, abs_cross, abs_cross_ci, d_opt))
+  abs_cross_lci <- sqrt(rowSums(bands_lci^2)) # eq. 5 in publication
+  abs_cross_uci <- sqrt(rowSums(bands_uci^2)) # eq. 5 in publication
   
+  # return bands spectra and errors, full spectrum and errors, and linewidths
+  return(list(bands, bands_lci, bands_uci, abs_cross, abs_cross_lci, abs_cross_uci, d_opt))
 }
 
 
@@ -329,15 +338,17 @@ band_gen_pdf <- function(df, E, ci){
   # ci: If true, computes confidence intervals
   ## Ouput:
   # abs_cross: band spectrum
-  # abs_cross_ci: band spectrum confidence interval
+  # abs_cross_lci: band spectrum lower confidence interval
+  # abs_cross_uci: band spectrum upper confidence interval
   # k_opt: optimal number of mixtures
   # model_opt: model name (constraints)
-
+  
   # store number of geometries (structural configurations)
   n_geoms <- dim(df)[1]
   
   # remove geometries with M = 0
   zeros <- which(df[,2]==0)
+  #zeros <- c()
   
   if(length(zeros)>(n_geoms-5)){ # if there is less than 5 values with M != 0, set abs to 0
     abs_cross <- rep(0,length(E))
@@ -377,7 +388,7 @@ band_gen_pdf <- function(df, E, ci){
     single_gmm <- Mclust(df_stand, x = nclust, verbose = FALSE)
     model_opt <- single_gmm$modelName
     k_opt <-single_gmm$G
-
+    
     # compute transition cross section
     abs_cross <- gmm_band(single_gmm, Theta_0, E, mu_vee, sd_vee, mu_m, sd_m)
     
@@ -402,19 +413,25 @@ band_gen_pdf <- function(df, E, ci){
         skip_to_next <- FALSE
         tryCatch(single_gmm <- Mclust(df_boot, x = nclust, verbose = FALSE), error = function(e){skip_to_next <- TRUE})
         if(skip_to_next){ next }
-  
+        
         # compute transition cross section
         abs_boot[bb,] <- gmm_band(single_gmm, Theta_0, E, mu_vee, sd_vee, mu_m, sd_m)
       }
-      # compute CI (eq. 4 in publication)
-      abs_cross_ci <- qt(0.025, n_boot, lower.tail = FALSE)*matrixStats::colSds(abs_boot, na.rm = TRUE)
+      
+      # compute lower and upper bound errors (95% CI) by taking quantiles (0.025, 0.975)
+      # and subtracting original mean
+      abs_cross_lci <- matrixStats::colQuantiles(abs_boot, probs = 0.025)
+      abs_cross_lci <- abs(abs_cross_lci - abs_cross)
+      abs_cross_uci <- matrixStats::colQuantiles(abs_boot, probs = 0.975)
+      abs_cross_uci <- abs(abs_cross_uci - abs_cross)
     } else{
-      abs_cross_ci <- rep(0,length(E))
-      }
+      abs_cross_lci <- rep(0,length(E))
+      abs_cross_uci <- rep(0,length(E))
+    }
   }
   
   # return band shape, band shape CI, optimized number of mixtures, and optimized model name
-  return(list(abs_cross,abs_cross_ci,k_opt,model_opt))
+  return(list(abs_cross,abs_cross_lci,abs_cross_uci,k_opt,model_opt))
 }
 
 # function to compute GMM-NEA spectrum
@@ -425,9 +442,11 @@ gmm_nea_spectra <- function(df,E,ci){
   # ci: If true, computes confidence intervals
   ## Ouput:
   # bands: dataframe with band cross section spectrum
-  # bands_std: dataframe with band cross section spectrum standard deviation
+  # bands_lci: dataframe with band cross section spectrum lower confidence interval
+  # bands_uci: dataframe with band cross section spectrum upper confidence interval
   # abs_cross: array with full cross section spectrum
-  # abs_cross_ci: array with full cross section spectrum confidence intervals
+  # abs_cross_lci: array with full cross section spectrum lower confidence interval
+  # abs_cross_uci: array with full cross section spectrum upper confidence interval
   # k_opt: optimal number of mixtures
   # model_opt: model name (constraints)
   
@@ -455,7 +474,7 @@ gmm_nea_spectra <- function(df,E,ci){
   ) %dopar% {
     band_tmp <- band_gen_pdf(df[,c(ii,ii+n_states)], E, ci)
     # merge to avoid list of lists
-    c(band_tmp[[1]],band_tmp[[2]],band_tmp[[3]],band_tmp[[4]])
+    c(band_tmp[[1]],band_tmp[[2]],band_tmp[[3]],band_tmp[[4]],band_tmp[[5]])
   }
   
   # separate bands from model name and convert to numeric values
@@ -463,20 +482,22 @@ gmm_nea_spectra <- function(df,E,ci){
   
   bands_plus_k <- band_par[1:(n_rows-1),]
   class(bands_plus_k) <- "numeric"
-  
-  bands <- bands_plus_k[1:((n_rows-2)/2),]
-  bands_ci <- bands_plus_k[((n_rows-2)/2+1):(n_rows-2),]
+
+  bands <- bands_plus_k[1:length(E),] # band cross section spectrum
+  bands_lci <- bands_plus_k[(length(E)+1):(2*length(E)),] # band cross section spectrum CI
+  bands_uci <- bands_plus_k[(2*length(E)+1):(3*length(E)),] # band cross section spectrum CI
   
   # generate full spectrum by adding up all bands contributions
   abs_cross <- rowSums(bands) # eq. 3 in publication
-  abs_cross_ci <- sqrt(rowSums(bands_ci^2))  # eq. 5 in publication
+  abs_cross_lci <- sqrt(rowSums(bands_lci^2)) # eq. 5 in publication
+  abs_cross_uci <- sqrt(rowSums(bands_uci^2)) # eq. 5 in publication
   
   # optimal GMM model parameters
   k_opt <- bands_plus_k[(n_rows-1),]
   model_opt <- band_par[n_rows,]
   
-  # return bands, band errors, spectrum, spectrum error, and GMM model parameters
-  return(list(bands, bands_ci, abs_cross, abs_cross_ci, model_opt, k_opt))
+  # return bands, band errors, spectrum, spectrum errors, and GMM model hyperparameters
+  return(list(bands, bands_lci, bands_uci, abs_cross, abs_cross_lci, abs_cross_uci, model_opt, k_opt))
 }
 
 ##########################################################################################################
@@ -488,7 +509,7 @@ save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms){
   outputDIR <- input_folder
   #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
   # set output file name
-  file_name <- paste(outputDIR,'/auto_d_spectra_eV_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
+  file_name <- paste(outputDIR,'auto_d_spectra_eV_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
   # set file header
   line <- paste('##### Reconstructed absorption cross section spectrum (',molecule,') ##### \n',
                 '## Number of input transitions: ', n_states, '\n',
@@ -512,7 +533,7 @@ save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms)
   outputDIR <- input_folder
   #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
   # set output file name
-  file_name <- paste(outputDIR,'/GMM_NEA_spectra_eV_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
+  file_name <- paste(outputDIR,'GMM_NEA_spectra_eV_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
   # set file header
   line <- paste('##### Reconstructed absorption cross section spectrum (',molecule,') ##### \n',
                 '## Number of input transitions: ', n_states, '\n',
@@ -556,12 +577,12 @@ plot_spectra <- function(sigma_auto_d,sigma_gmm,molecule){
   legend('top',legend = c(expression('auto-' ~ delta), 'GMM-NEA'), col = c(1,2), lty = c(1,1), lwd = 2, cex = 0.8)
   
   # Fill area between CI lines
-  ul <- sigma_auto_d[,2]+sigma_auto_d[,3]  
+  ul <- sigma_auto_d[,2]+sigma_auto_d[,4]  
   ll <- sigma_auto_d[,2]-sigma_auto_d[,3]
   polygon(c(E, rev(E)), c(ul, rev(ll)),
           col = scales::alpha(1, 0.1), lty = 0)  
   
-  ul <- sigma_gmm[,2]+sigma_gmm[,3]  
+  ul <- sigma_gmm[,2]+sigma_gmm[,4]  
   ll <- sigma_gmm[,2]-sigma_gmm[,3]
   polygon(c(E, rev(E)), c(ul, rev(ll)),
           col = scales::alpha(2, 0.1), lty = 0)
