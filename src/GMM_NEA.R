@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/Rscript
 
 # Author: Luis Cerdán <lcerdanphd_at_gmail.com>
 #                     <https://github.com/lucerlab>
