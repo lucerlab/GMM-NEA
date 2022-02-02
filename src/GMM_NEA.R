@@ -1,4 +1,4 @@
-#!/soft/R-4.1.1/bin/Rscript
+#!/usr/bin/env Rscript
 
 # Author: Luis Cerdán <lcerdanphd_at_gmail.com>
 #                     <https://github.com/lucerlab>
@@ -28,6 +28,7 @@ for(ii in 1:length(needed.packages)){
     missing.pkg <- TRUE
   }
 }
+
 if(missing.pkg){
   message(needed.packages[pkgs])
   stop("The above packages are missing. Please, install.", call.=FALSE)
@@ -195,6 +196,7 @@ message('Running auto-d...')
 
 # compute bands and spectrum using auto-d
 spectra_auto_d <- auto_d_spectra(df_tr, E, ci)
+sigma_auto_d[,1] <- E # add energies
 sigma_auto_d[,seq(5,(3*n_states+4), by = 3)] <- spectra_auto_d[[1]] # add bands
 sigma_auto_d[,seq(6,(3*n_states+4), by = 3)] <- spectra_auto_d[[2]] # add bands lci
 sigma_auto_d[,seq(7,(3*n_states+4), by = 3)] <- spectra_auto_d[[3]] # add bands uci
@@ -208,14 +210,7 @@ message('Running GMM-NEA...')
 
 # compute bands and spectrum using GMM-NEA
 spectra_gmm <- gmm_nea_spectra(df_tr,E,ci)
-sigma_gmm[,1] <- E
-sigma_gmm[,seq(4,(2*n_states+3), by = 2)] <- spectra_gmm[[1]]
-sigma_gmm[,seq(5,(2*n_states+3), by = 2)] <- spectra_gmm[[2]]
-sigma_gmm[,2] <- spectra_gmm[[3]]
-sigma_gmm[,3] <- spectra_gmm[[4]]
-gmm_model_opt <- spectra_gmm[[5]]
-gmm_k_opt <- spectra_gmm[[6]]
-
+sigma_gmm[,1] <- E # add energies
 sigma_gmm[,seq(5,(3*n_states+4), by = 3)] <- spectra_gmm[[1]] # add bands
 sigma_gmm[,seq(6,(3*n_states+4), by = 3)] <- spectra_gmm[[2]] # add bands lci
 sigma_gmm[,seq(7,(3*n_states+4), by = 3)] <- spectra_gmm[[3]] # add bands uci
