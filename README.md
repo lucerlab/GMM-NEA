@@ -15,7 +15,7 @@ It requires the installation of [R](https://cran.r-project.org/) (and optionally
 
 Before running this script, make sure that the following packages (and their dependencies) are installed: 
 
-`'doParallel'` `'foreach'` `'matrixStats'` `'mclust'` `'optparse'``'parallel'` `'robustbase'` `'scales'` 
+`'doParallel'` `'foreach'` `'matrixStats'` `'mclust'` `'optparse'` `'parallel'` `'robustbase'` `'scales'` 
 
 ## Installation
 
