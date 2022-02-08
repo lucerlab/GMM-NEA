@@ -73,7 +73,8 @@ with quotations (`"` or `'`).
 
 - The *optional* argument `-t` (or `--threads`) specifies the number of threads to use in the multi-threading parallelization. By default, it uses all available threads (`-t -1`).
 
-- The *optional* argument `-o` (or `--outliers`) specifies the program whether to find/remove (`-o TRUE`) or ignore (`-o FALSE`) outliers. By default, set to `TRUE`.
+- The *optional* argument `-o` (or `--outliers`) specifies the program whether to remove (`-o TRUE`) or ignore (`-o FALSE`) outliers. By default, set to `FALSE`. A list of possible
+outliers is always provided.
 
 - The *optional* argument `-c` (or `--conf_inter`) specifies the program to compute (`-c TRUE`) or not (`-c FALSE`) the confidence intervals (CI) of the NEA spectrum. By default, set to `FALSE`.
 
@@ -105,7 +106,7 @@ confidence intervals (CI). File 3 is a plot of the NEA spectra computed both wit
 1 and 2 summarize the input and the model parameters used to reconstruct the NEA spectra. For auto-*d* (File 1), it includes 
 the empirical bandwidths *d* for each transition. For GMM-NEA (File 2), it includes the number of mixtures (*K*) and the model constraints
 (*M*) for each transition. If any outlier is detected, the corresponding geometry/configuration
-is stated as well in the header (*Skipped geometries (outliers)*). A sample of Files 1 and 2 can be found in the folder `Data`.
+is stated as well in the header (*Possible outliers (geometry id)*). A sample of Files 1 and 2 can be found in the folder `Data`.
 
 #### Before running the script (executable)
 
