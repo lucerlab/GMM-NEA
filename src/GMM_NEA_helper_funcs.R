@@ -504,7 +504,7 @@ gmm_nea_spectra <- function(df,E,ci){
 ###### functions to save absorption cross section full spectrum and transitions spectra
 ##########################################################################################################
 
-save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms){
+save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms, outlier_flag){
   # make directory to store results if doesn't exist
   outputDIR <- input_folder
   #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
@@ -514,7 +514,8 @@ save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms){
   line <- paste('##### Reconstructed absorption cross section spectrum (',molecule,') ##### \n',
                 '## Number of input transitions: ', n_states, '\n',
                 '## Number of input geometries: ', n_geoms, '\n',
-                '## Skipped geometries (outliers): ', paste(outlier_geoms, collapse = ', '), '\n',
+                '## Possible outliers (geometry id): ', paste(outlier_geoms, collapse = ', '), '\n',
+                '## Remove outliers?: ', toString(outliers_flag), '\n',
                 '## Model: auto-d \n',
                 '## Empirical bandwidths d: ', paste(round(d,3), collapse =', '), '\n',
                 '## Date: ', Sys.Date(), sep = '')
@@ -528,7 +529,7 @@ save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms){
     )
 }
 
-save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms){
+save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms, outliers_flag){
   # make directory to store results if it doesn't exist
   outputDIR <- input_folder
   #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
@@ -538,7 +539,8 @@ save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms)
   line <- paste('##### Reconstructed absorption cross section spectrum (',molecule,') ##### \n',
                 '## Number of input transitions: ', n_states, '\n',
                 '## Number of input geometries: ', n_geoms, '\n',
-                '## Skipped geometries (outliers): ', paste(outlier_geoms, collapse = ', '), '\n',
+                '## Possible outliers (geometry id): ', paste(outlier_geoms, collapse = ', '), '\n',
+                '## Remove outliers?: ', toString(outliers_flag), '\n',
                 '## Model: GMM-NEA \n',
                 '## Number of mixtures (K): ', paste(k_opt, collapse = ', '), '\n',
                 '## Model constraints (M): ', paste(model_names, collapse = ', '), '\n',

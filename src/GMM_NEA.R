@@ -61,7 +61,7 @@ source('GMM_NEA_helper_funcs.R', chdir = TRUE)
 # terminal example:
 # Rscript GMM_NEA.R -p "uracil radical" -f vee_f_uracil_radical.csv -m U6OH [-o TRUE] [-c FALSE] [-n -1]
 # or
-# Rscript GMM_NEA.R --path "uracil radical" -f vee_f_uracil_radical.csv -m U6OH [-o TRUE] [-c FALSE] [-n -1]
+# Rscript GMM_NEA.R --path "uracil radical" --file vee_f_uracil_radical.csv --molecule U6OH [-o TRUE] [-c FALSE] [-n -1]
 
 option_list = list(
   optparse::make_option(c("-p", "--path"), type="character", default=NULL, 
@@ -72,8 +72,8 @@ option_list = list(
               help="Output file name identifier [default=%default]", metavar="character"),
   optparse::make_option(c("-t", "--threads"), type="integer", default= -1, 
               help="Number of threads [default=%default]", metavar="integer"),
-  optparse::make_option(c("-o", "--outliers"), type="logical", default= TRUE, 
-              help="Find and remove outliers? [default=%default]", metavar="logical"),
+  optparse::make_option(c("-o", "--outliers"), type="logical", default= FALSE, 
+              help="Remove outliers? [default=%default]", metavar="logical"),
   optparse::make_option(c("-c", "--conf_inter"), type="logical", default= FALSE, 
               help="Compute confidence intervals? [default=%default]", metavar="logical"),
   optparse::make_option(c("-l", "--lowerE"), type="double", default= NULL, 
@@ -101,7 +101,7 @@ if ( is.null(opt$path) ) { # if path is NULL, set to current folder
 }
 input_file <- opt$file
 molecule <- opt$molecule
-outliers <- opt$outliers
+outliers_flag <- opt$outliers
 ci <- opt$conf_inter
 n_threads <- opt$threads
 
@@ -146,13 +146,11 @@ n_states <- ncol(df_tr)/2
 n_geoms <- nrow(df_tr)
 
 # Determine outliers with Mahalanobis distance and the False Discovery Rate (FDR)
-if(outliers){
-  outliers <- find_outliers(df_tr,0.001)
-  df_tr <- outliers[[1]] # clean data frame
-  outlier_geoms <- outliers[[2]] # list of outlier geometries
-} else {
-  outlier_geoms <- 'None'
-}
+outliers <- find_outliers(df_tr,0.001)
+outlier_geoms <- outliers[[2]] # list of possible outlier geometries
+if(outliers_flag){
+  df_tr <- outliers[[1]] # use clean data frame
+} 
 
 ######################################################################
 ###########                COMPUTE SPECTRA              ##############
@@ -230,13 +228,13 @@ parallel::stopCluster(cl = my.cluster)
 message('Saving results...')
 
 # save dataframes with spectra
-save_sigma_eV_auto(sigma_auto_d,n_geoms,d_opt,outlier_geoms)
-save_sigma_eV_gmm(sigma_gmm,n_geoms,gmm_model_opt,gmm_k_opt,outlier_geoms)
+save_sigma_eV_auto(sigma_auto_d, n_geoms, d_opt, outlier_geoms, outliers_flag)
+save_sigma_eV_gmm(sigma_gmm, n_geoms, gmm_model_opt, gmm_k_opt, outlier_geoms, outliers_flag)
 
 # save plot
 pdf(paste(input_folder,'Spectra_eV_auto_d_vs_GMM_NEA_',n_geoms,'_geoms_', molecule,'.pdf', sep = ''),
     width = 8.5, height = 6)
-plot_spectra(sigma_auto_d,sigma_gmm,molecule)
+plot_spectra(sigma_auto_d, sigma_gmm, molecule)
 garbage <- dev.off()
 
 
