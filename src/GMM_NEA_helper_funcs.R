@@ -352,7 +352,8 @@ band_gen_pdf <- function(df, E, ci){
   
   if(length(zeros)>(n_geoms-5)){ # if there is less than 5 values with M != 0, set abs to 0
     abs_cross <- rep(0,length(E))
-    abs_cross_ci <- rep(0,length(E))
+    abs_cross_lci <- rep(0,length(E))
+    abs_cross_uci <- rep(0,length(E))
     k_opt <- 0
     model_opt <- 'none'
   }
