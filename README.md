@@ -148,7 +148,7 @@ These last two lines might have to be changed depending on your installation. In
 #### Examples: 
 
 ```
-$ GMM_NEA.R -f vee_f_U6OH_100_geoms.csv -p Data -m U6OH -c TRUE
+$ GMM_NEA.R -f vee_f_U6OH_100_geoms.csv -p Data -m U6OH -o TRUE -c TRUE
 ```
 
 <img src="figures/Spectra_eV_auto_d_vs_GMM_NEA_100_geoms_U6OH.png" width="400"/>
