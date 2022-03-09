@@ -102,11 +102,14 @@ Once the computation is over, the following files are saved into the directory s
 
 Files 1 and 2 contain the dataset with the computed NEA absorption cross section (in cm^2) as a function of energy (in eV) 
 for the whole spectrum (`sigma_cm2_full`) and for each transition (`sigma_cm2_Band_#`), together with their corresponding lower and upper 95%
-confidence intervals (CI). File 3 is a plot of the NEA spectra computed both with auto-*d* and GMM-NEA (see examples below). The headers in Files 
-1 and 2 summarize the input and the model parameters used to reconstruct the NEA spectra. For auto-*d* (File 1), it includes 
+confidence intervals (CI). File 3 is a plot of the NEA spectra computed both with auto-*d* and GMM-NEA (see examples below). Files with the NEA cross sections
+as a function of wavelength (in nm) are as well generated. A sample of Files 1 and 2 can be found in the folder `Data`.
+
+The headers in Files 1 and 2 summarize the input and the model parameters used to reconstruct the NEA spectra. For auto-*d* (File 1), it includes 
 the empirical bandwidths *d* for each transition. For GMM-NEA (File 2), it includes the number of mixtures (*K*) and the model constraints
 (*M*) for each transition. If any outlier is detected, the corresponding geometry/configuration
-is stated as well in the header (*Possible outliers (geometry id)*). A sample of Files 1 and 2 can be found in the folder `Data`.
+is stated as well in the header (*Possible outliers (geometry id)*). 
+
 
 #### Before running the script (executable)
 
