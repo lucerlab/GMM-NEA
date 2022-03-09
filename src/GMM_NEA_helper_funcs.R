@@ -371,7 +371,7 @@ band_gen_pdf <- function(df, E, ci){
     D <- 2 # dimensionality of data 
     Df <- (D*D - D)/2 + 2*D + 1 # Degrees of freedom for single normal
     k_max <- floor((dim(df)[1]+1)/Df/5) # use at least 5 observations per parameter
-    k_max <- max(c(3,k_max)) # set minimum to 3 to force more flexibility
+    k_max <- max(c(2,k_max)) # set minimum to 2 to force more flexibility
     k_max <- min(c(10,k_max)) # set maximum to 10 to avoid lengthy computations
     k_min <- 2 # set minimum to force more flexibility
     
@@ -530,6 +530,41 @@ save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms, outlier_flag){
     )
 }
 
+save_sigma_nm_auto <- function(sigma, n_geoms, d, outlier_geoms, outlier_flag){
+  # eV to nm conversion
+  c=299792458.0 # speed of light m/s
+  hev=4.135667662e-15 # Planck's constant eV·s
+  factor=hev*c*1.0e9
+  
+  sigma[,1] <- factor/sigma[,1]
+  
+  # change column name
+  colnames(sigma)[1] <- 'wl_nm'
+  
+  # make directory to store results if doesn't exist
+  outputDIR <- input_folder
+  #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
+  # set output file name
+  file_name <- paste(outputDIR,'auto_d_spectra_nm_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
+  # set file header
+  line <- paste('##### Reconstructed absorption cross section spectrum (',molecule,') ##### \n',
+                '## Number of input transitions: ', n_states, '\n',
+                '## Number of input geometries: ', n_geoms, '\n',
+                '## Possible outliers (geometry id): ', paste(outlier_geoms, collapse = ', '), '\n',
+                '## Remove outliers?: ', toString(outliers_flag), '\n',
+                '## Model: auto-d \n',
+                '## Empirical bandwidths d: ', paste(round(d,3), collapse =', '), '\n',
+                '## Date: ', Sys.Date(), sep = '')
+  
+  # write header and dataframe to file
+  write(line,file_name)
+  suppressWarnings(
+    write.table(
+      format(sigma, digits = 6), file_name, sep = ",", row.names = FALSE, quote = FALSE, append = T
+    )
+  )
+}
+
 save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms, outliers_flag){
   # make directory to store results if it doesn't exist
   outputDIR <- input_folder
@@ -556,11 +591,47 @@ save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms,
     )
 }
 
+save_sigma_nm_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms, outliers_flag){
+  # eV to nm conversion
+  c=299792458.0 # speed of light m/s
+  hev=4.135667662e-15 # Planck's constant eV·s
+  factor=hev*c*1.0e9
+  
+  sigma[,1] <- factor/sigma[,1]
+  
+  # change column name
+  colnames(sigma)[1] <- 'wl_nm'
+  
+  # make directory to store results if it doesn't exist
+  outputDIR <- input_folder
+  #if (!dir.exists(outputDIR)) {dir.create(outputDIR)}
+  # set output file name
+  file_name <- paste(outputDIR,'GMM_NEA_spectra_nm_',n_geoms,'_geoms_', molecule,'.csv', sep = '')
+  # set file header
+  line <- paste('##### Reconstructed absorption cross section spectrum (',molecule,') ##### \n',
+                '## Number of input transitions: ', n_states, '\n',
+                '## Number of input geometries: ', n_geoms, '\n',
+                '## Possible outliers (geometry id): ', paste(outlier_geoms, collapse = ', '), '\n',
+                '## Remove outliers?: ', toString(outliers_flag), '\n',
+                '## Model: GMM-NEA \n',
+                '## Number of mixtures (K): ', paste(k_opt, collapse = ', '), '\n',
+                '## Model constraints (M): ', paste(model_names, collapse = ', '), '\n',
+                '## Date: ', Sys.Date(), sep = '')
+  
+  # write header and dataframe to file
+  write(line,file_name)
+  suppressWarnings(
+    write.table(
+      format(sigma, digits = 6), file_name, sep = ",", row.names = FALSE, quote = FALSE, append = T
+    )
+  )
+}
+
 ##########################################################################################################
-### function to plot spectra
+### function to plot spectra and save figures
 ##########################################################################################################
 
-plot_spectra <- function(sigma_auto_d,sigma_gmm,molecule){
+plot_spectra_eV <- function(sigma_auto_d,sigma_gmm,molecule){
   par(mar=c(4.5,4.6,1.5,1)+.1) # 'bottom', 'left', 'top', 'right'
   y_max <- 1.05*max(c(sigma_auto_d[,2],sigma_gmm[,2]))
   
@@ -591,3 +662,53 @@ plot_spectra <- function(sigma_auto_d,sigma_gmm,molecule){
           col = scales::alpha(2, 0.1), lty = 0)
 }
 
+plot_spectra_nm <- function(sigma_auto_d,sigma_gmm,molecule){
+  par(mar=c(4.5,4.6,1.5,1)+.1) # 'bottom', 'left', 'top', 'right'
+  y_max <- 1.05*max(c(sigma_auto_d[,2],sigma_gmm[,2]))
+  
+  # eV to nm conversion factor
+  c=299792458.0 # speed of light m/s
+  hev=4.135667662e-15 # Planck's constant eV·s
+  factor=hev*c*1.0e9
+  
+  wl <- factor/sigma_auto_d[,1]
+  
+  plot(wl,sigma_auto_d[,2], 
+       xlab = expression(lambda *' (nm)'), 
+       ylab= expression(sigma[abs] * '(' * lambda *') (cm'^2*')'), 
+       ylim = c(0,y_max), 
+       type = "l", 
+       lty = 1, lwd = 2,
+       main = paste('NEA spectra for ', n_geoms, ' geometries', sep = ''),
+       cex.axis = 1.2,
+       cex.lab = 1.5)
+  
+  lines(wl,sigma_gmm[,2], col = 2, lwd = 2)
+  legend('top',legend = c(expression('auto-' ~ delta), 'GMM-NEA'), col = c(1,2), lty = c(1,1), lwd = 2, cex = 0.8)
+  
+  # Fill area between CI lines
+  ul <- sigma_auto_d[,2]+sigma_auto_d[,4]  
+  ll <- sigma_auto_d[,2]-sigma_auto_d[,3]
+  polygon(c(wl, rev(wl)), c(ul, rev(ll)),
+          col = scales::alpha(1, 0.1), lty = 0)  
+  
+  ul <- sigma_gmm[,2]+sigma_gmm[,4]  
+  ll <- sigma_gmm[,2]-sigma_gmm[,3]
+  polygon(c(wl, rev(wl)), c(ul, rev(ll)),
+          col = scales::alpha(2, 0.1), lty = 0)
+}
+
+
+save_plots <- function(sigma_auto_d,sigma_gmm,molecule,n_geoms){
+  # save plots in eV
+  pdf(paste(input_folder,'Spectra_eV_auto_d_vs_GMM_NEA_',n_geoms,'_geoms_', molecule,'.pdf', sep = ''),
+      width = 8.5, height = 6)
+  plot_spectra_eV(sigma_auto_d, sigma_gmm, molecule)
+  garbage <- dev.off()
+  
+  # save plots in nm
+  pdf(paste(input_folder,'Spectra_nm_auto_d_vs_GMM_NEA_',n_geoms,'_geoms_', molecule,'.pdf', sep = ''),
+      width = 8.5, height = 6)
+  plot_spectra_nm(sigma_auto_d, sigma_gmm, molecule)
+  garbage <- dev.off()
+}

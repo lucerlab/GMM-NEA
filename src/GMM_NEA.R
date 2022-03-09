@@ -153,7 +153,7 @@ if(outliers_flag){
 } 
 
 ######################################################################
-###########                COMPUTE SPECTRA              ##############
+###########          COMPUTE SPECTRA AND SAVE           ##############
 ######################################################################
 
 # Arrays to store results (three columns per state plus columns for 
@@ -169,7 +169,7 @@ for(ii in 1:n_states){
             paste('sigma_cm2_Band_',ii, '_uci', sep = ''))
 }
 
-# define spectral coverage (check arguments pass to terminal)
+# define spectral coverage (check arguments passed to terminal)
 if ( is.null(opt$lowerE) ) {
   e_min <- floor(min(df_tr[,1:n_states]))
 } else {
@@ -190,6 +190,8 @@ sigma_auto_d <- as.data.frame(matrix(0, nrow = length(E), ncol = (3*n_states+4))
 colnames(sigma_auto_d)<- cols
 sigma_gmm <- sigma_auto_d
 
+############## auto-d ############
+
 message('Running auto-d...')
 
 # compute bands and spectrum using auto-d
@@ -203,6 +205,14 @@ sigma_auto_d[,3] <- spectra_auto_d[[5]] # add spec lci
 sigma_auto_d[,4] <- spectra_auto_d[[6]] # add spec uci
 d_opt <- spectra_auto_d[[7]] # add optimized linewidths
 
+# save dataframes with spectra 
+save_sigma_eV_auto(sigma_auto_d, n_geoms, d_opt, outlier_geoms, outliers_flag)
+save_sigma_nm_auto(sigma_auto_d, n_geoms, d_opt, outlier_geoms, outliers_flag)
+
+# save plotS
+save_plots(sigma_auto_d, sigma_gmm, molecule, n_geoms)
+
+############## GMM-NEA ############
 
 message('Running GMM-NEA...')
 
@@ -218,24 +228,16 @@ sigma_gmm[,4] <- spectra_gmm[[6]] # add spec uci
 gmm_model_opt <- spectra_gmm[[7]] # add optimized model names
 gmm_k_opt <- spectra_gmm[[8]] # add optimized number of mixtures
 
+# save dataframes with spectra
+save_sigma_eV_gmm(sigma_gmm, n_geoms, gmm_model_opt, gmm_k_opt, outlier_geoms, outliers_flag)
+save_sigma_nm_gmm(sigma_gmm, n_geoms, gmm_model_opt, gmm_k_opt, outlier_geoms, outliers_flag)
+
+# save plots
+save_plots(sigma_auto_d, sigma_gmm, molecule, n_geoms)
+
 # stop using parallel cluster
 parallel::stopCluster(cl = my.cluster)
 
-######################################################################
-###########            SAVE AND PLOT RESULTS            ##############
-######################################################################
-
-message('Saving results...')
-
-# save dataframes with spectra
-save_sigma_eV_auto(sigma_auto_d, n_geoms, d_opt, outlier_geoms, outliers_flag)
-save_sigma_eV_gmm(sigma_gmm, n_geoms, gmm_model_opt, gmm_k_opt, outlier_geoms, outliers_flag)
-
-# save plot
-pdf(paste(input_folder,'Spectra_eV_auto_d_vs_GMM_NEA_',n_geoms,'_geoms_', molecule,'.pdf', sep = ''),
-    width = 8.5, height = 6)
-plot_spectra(sigma_auto_d, sigma_gmm, molecule)
-garbage <- dev.off()
 
 
 message('Done!!')
