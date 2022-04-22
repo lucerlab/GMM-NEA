@@ -3,7 +3,8 @@ GMM-NEA
 
 ## Overview
 
-`R` code implementing the methodologies reported in the paper "*Reconstruction of Nuclear Ensemble Approach Electronic Spectra using Probabilistic Machine Learning*" (L. Cerdán and D. Roca-Sanjuán, 2022). 
+`R` code implementing the methodologies reported in the paper "*Reconstruction of Nuclear Ensemble Approach Electronic Spectra using Probabilistic Machine Learning*" 
+([L. Cerdán and D. Roca-Sanjuán, 2022]{https://pubs.acs.org/10.1021/acs.jctc.2c00004}). 
 It contains a fully functional version of the algorithm to reconstruct the NEA spectra using Kernel Density Estimation (KDE) Silverman's rule of thumb to choose the phenomenological
 bandwidth *d* (auto-*d*) and using Gaussian Mixture Models to avoid *d* altogether (GMM-NEA).
 
@@ -165,6 +166,6 @@ $ GMM_NEA.R --file vee_f_benzene.csv --path 'results/benzene td-dft' -m benzene_
 ## Reference
 
 L. Cerdán and D. Roca-Sanjuán, Reconstruction of Nuclear Ensemble Approach Electronic Spectra using Probabilistic
-Machine Learning. *J. Chem. Theory Comput.*,  2022, XXX, XXX−XXX
+Machine Learning. *J. Chem. Theory Comput.*, 2022, [DOI: 10.1021/acs.jctc.2c00004]{https://pubs.acs.org/10.1021/acs.jctc.2c00004}
 
 
