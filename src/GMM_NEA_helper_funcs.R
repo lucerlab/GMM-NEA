@@ -233,6 +233,9 @@ auto_d_spectra <- function(df,E,ci){
     c(band_tmp[[1]],band_tmp[[2]],band_tmp[[3]],band_tmp[[4]])
   }
   
+  # convert to matrix form (to allow for one transition computations)
+  band_par <- as.matrix(band_par)
+  
   # separate bands from bandwidth
   n_rows <- nrow(band_par)
   
@@ -242,9 +245,15 @@ auto_d_spectra <- function(df,E,ci){
   d_opt <- band_par[n_rows,] # array with auto-d linewidths
   
   # generate full spectrum by adding up all bands contributions
-  abs_cross <- rowSums(bands) # eq. 3 in publication
-  abs_cross_lci <- sqrt(rowSums(bands_lci^2)) # eq. 5 in publication
-  abs_cross_uci <- sqrt(rowSums(bands_uci^2)) # eq. 5 in publication
+  if(ncol(band_par)!=1){ # if there are multiple bands
+    abs_cross <- rowSums(bands) # eq. 3 in publication
+    abs_cross_lci <- sqrt(rowSums(bands_lci^2)) # eq. 5 in publication
+    abs_cross_uci <- sqrt(rowSums(bands_uci^2)) # eq. 5 in publication
+  } else {# if there is only one
+    abs_cross <- bands
+    abs_cross_lci <- bands_lci
+    abs_cross_uci <- bands_uci
+  }
   
   # return bands spectra and errors, full spectrum and errors, and linewidths
   return(list(bands, bands_lci, bands_uci, abs_cross, abs_cross_lci, abs_cross_uci, d_opt))
@@ -478,20 +487,32 @@ gmm_nea_spectra <- function(df,E,ci){
     c(band_tmp[[1]],band_tmp[[2]],band_tmp[[3]],band_tmp[[4]],band_tmp[[5]])
   }
   
+  # convert to matrix form (to allow for one transition computations)
+  band_par <- as.matrix(band_par)
+  
   # separate bands from model name and convert to numeric values
   n_rows <- nrow(band_par)
   
   bands_plus_k <- band_par[1:(n_rows-1),]
   class(bands_plus_k) <- "numeric"
+  
+  # reconvert to matrix form
+  bands_plus_k <- as.matrix(bands_plus_k)
 
   bands <- bands_plus_k[1:length(E),] # band cross section spectrum
   bands_lci <- bands_plus_k[(length(E)+1):(2*length(E)),] # band cross section spectrum CI
   bands_uci <- bands_plus_k[(2*length(E)+1):(3*length(E)),] # band cross section spectrum CI
   
   # generate full spectrum by adding up all bands contributions
-  abs_cross <- rowSums(bands) # eq. 3 in publication
-  abs_cross_lci <- sqrt(rowSums(bands_lci^2)) # eq. 5 in publication
-  abs_cross_uci <- sqrt(rowSums(bands_uci^2)) # eq. 5 in publication
+  if(ncol(band_par)!=1){ # if there are multiple bands
+    abs_cross <- rowSums(bands) # eq. 3 in publication
+    abs_cross_lci <- sqrt(rowSums(bands_lci^2)) # eq. 5 in publication
+    abs_cross_uci <- sqrt(rowSums(bands_uci^2)) # eq. 5 in publication
+  } else {# if there is only one
+    abs_cross <- bands
+    abs_cross_lci <- bands_lci
+    abs_cross_uci <- bands_uci
+  }
   
   # optimal GMM model parameters
   k_opt <- bands_plus_k[(n_rows-1),]
