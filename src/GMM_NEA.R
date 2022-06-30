@@ -175,6 +175,8 @@ if ( is.null(opt$lowerE) ) {
 } else {
   e_min <- opt$lowerE
 }
+if (e_min==0) {e_min=0.5} # if 0, gives "division by zero" problems. Fix to 0.5 eV
+
 if ( is.null(opt$upperE) ) {
   e_max <- ceiling(max(df_tr[,1:n_states]))
 } else {

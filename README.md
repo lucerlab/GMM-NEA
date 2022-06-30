@@ -4,7 +4,7 @@ GMM-NEA
 ## Overview
 
 `R` code implementing the methodologies reported in the paper "*Reconstruction of Nuclear Ensemble Approach Electronic Spectra using Probabilistic Machine Learning*" 
-([L. Cerdán and D. Roca-Sanjuán, 2022](https://pubs.acs.org/doi/10.1021/acs.jctc.2c00004). 
+([L. Cerdán and D. Roca-Sanjuán, 2022](https://pubs.acs.org/doi/10.1021/acs.jctc.2c00004)). 
 It contains a fully functional version of the algorithm to reconstruct the NEA spectra using Kernel Density Estimation (KDE) Silverman's rule of thumb to choose the phenomenological
 bandwidth *d* (auto-*d*) and using Gaussian Mixture Models to avoid *d* altogether (GMM-NEA).
 
