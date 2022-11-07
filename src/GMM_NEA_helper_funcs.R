@@ -159,7 +159,7 @@ band_gen <- function(VEE, f, E, ci){
   zeros <- which(f==0)
   
   # automatic selection of bandwidth
-  if(length(zeros)>(confs-1)){ # if all geometries for a transition have f=0, fix d
+  if(length(zeros)>(confs-5)){ # if there is less than 5 values with f != 0, fix d
     d <- 0.2}
   else{
     d <- 2*auto_d(VEE,f) # multiply by 2 because auto_d returns the half-width
