@@ -1,5 +1,5 @@
 
-# Author: Luis Cerdán <lcerdanphd_at_gmail.com>
+# Author: Luis Cerd?n <lcerdanphd_at_gmail.com>
 #                     <https://github.com/lucerlab>
 
 #######################################################################
@@ -382,7 +382,7 @@ band_gen_pdf <- function(df, E, ci){
     k_max <- floor((dim(df)[1]+1)/Df/5) # use at least 5 observations per parameter
     k_max <- max(c(2,k_max)) # set minimum to 2 to force more flexibility
     k_max <- min(c(10,k_max)) # set maximum to 10 to avoid lengthy computations
-    k_min <- 2 # set minimum to force more flexibility
+    k_min <- 1
     
     # standardize data (it is convenient to avoid excessive differences in VEE and M scales)
     df_stand <- df
@@ -554,7 +554,7 @@ save_sigma_eV_auto <- function(sigma, n_geoms, d, outlier_geoms, outlier_flag){
 save_sigma_nm_auto <- function(sigma, n_geoms, d, outlier_geoms, outlier_flag){
   # eV to nm conversion
   c=299792458.0 # speed of light m/s
-  hev=4.135667662e-15 # Planck's constant eV·s
+  hev=4.135667662e-15 # Planck's constant eV?s
   factor=hev*c*1.0e9
   
   sigma[,1] <- factor/sigma[,1]
@@ -615,7 +615,7 @@ save_sigma_eV_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms,
 save_sigma_nm_gmm <- function(sigma, n_geoms, model_names, k_opt, outlier_geoms, outliers_flag){
   # eV to nm conversion
   c=299792458.0 # speed of light m/s
-  hev=4.135667662e-15 # Planck's constant eV·s
+  hev=4.135667662e-15 # Planck's constant eV?s
   factor=hev*c*1.0e9
   
   sigma[,1] <- factor/sigma[,1]
@@ -689,7 +689,7 @@ plot_spectra_nm <- function(sigma_auto_d,sigma_gmm,molecule){
   
   # eV to nm conversion factor
   c=299792458.0 # speed of light m/s
-  hev=4.135667662e-15 # Planck's constant eV·s
+  hev=4.135667662e-15 # Planck's constant eV?s
   factor=hev*c*1.0e9
   
   wl <- factor/sigma_auto_d[,1]
