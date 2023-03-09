@@ -26,47 +26,58 @@ find_outliers <- function(df,prob){
   # copy original dataframe for later use
   df_tr <- df
   
-  # store number of rows (n) and columns (p)
-  n <- nrow(df)
-  p <- ncol(df)
-
-  # "normalize" distribution (take square root of f divided by VEE)
-  df[,(p/2+1):p] <- sqrt(df[,(p/2+1):p]/df[,1:(p/2)])
-
-  # standardize data (robustly)
-  df <- apply(df,2,function(x){x-median(x)})
-  df <- apply(df,2,function(x){x/IQR(x)})
+  tryCatch({ # catch possible errors
+    
+    # store number of rows (n) and columns (p)
+    n <- nrow(df)
+    p <- ncol(df)
+    
+    # "normalize" distribution (take square root of f divided by VEE)
+    df[,(p/2+1):p] <- sqrt(df[,(p/2+1):p]/df[,1:(p/2)])
+    
+    # standardize data (robustly)
+    df <- apply(df,2,function(x){x-median(x)})
+    df <- apply(df,2,function(x){x/IQR(x)})
+    
+    # compute sample median (mu.rob) and robust covariance matrix (S.rob)
+    mu.rob <- robustbase::colMedians(df)
+    
+    M <-apply(df,2,function(x){x-median(x)}) # difference matrix
+    S.rob <- (n-1)^{-1} * t(M) %*% M # covariance matrix
+    
+    # compute squared Mahalanobis distance
+    D2 <- stats::mahalanobis(df,mu.rob,S.rob)
+    
+    # Obtain the p-values assuming Gaussianity (D2~chi^2_p)
+    p.values <- 1 - pchisq(D2,p)
+    
+    # Sort them in increasing order
+    sort.p.values <- sort(p.values,index.return=TRUE)
+    
+    # Which are the outliers? p.value < rho*prob/n
+    sort.i_outliers <- which(sort.p.values$x < ((1:n)/n*prob))
+    i_outliers <- sort.p.values$ix[sort.i_outliers]
+    
+    # store geometries containing outliers and remove them
+    if(length(i_outliers)!=0){
+      outlier_geoms <- rownames(df_tr)[i_outliers]
+      df_clean <- df_tr[-c(i_outliers),]
+    }else{
+      df_clean <- df_tr
+      outlier_geoms <- 'None'
+    }
+    
+    # return clean dataframe and list of outliers
+    return(list(df_clean,outlier_geoms))
+  },
   
-  # compute sample median (mu.rob) and robust covariance matrix (S.rob)
-  mu.rob <- robustbase::colMedians(df)
-
-  M <-apply(df,2,function(x){x-median(x)}) # difference matrix
-  S.rob <- (n-1)^{-1} * t(M) %*% M # covariance matrix
-  
-  # compute squared Mahalanobis distance
-  D2 <- stats::mahalanobis(df,mu.rob,S.rob)
-  
-  # Obtain the p-values assuming Gaussianity (D2~chi^2_p)
-  p.values <- 1 - pchisq(D2,p)
-  
-  # Sort them in increasing order
-  sort.p.values <- sort(p.values,index.return=TRUE)
-  
-  # Which are the outliers? p.value < rho*prob/n
-  sort.i_outliers <- which(sort.p.values$x < ((1:n)/n*prob))
-  i_outliers <- sort.p.values$ix[sort.i_outliers]
-  
-  # store geometries containing outliers and remove them
-  if(length(i_outliers)!=0){
-    outlier_geoms <- rownames(df_tr)[i_outliers]
-    df_clean <- df_tr[-c(i_outliers),]
-  }else{
-    df_clean <- df_tr
-    outlier_geoms <- 'None'
-  }
-  
-  # return clean dataframe and list of outliers
-  return(list(df_clean,outlier_geoms))
+  error = function(e){ # what to return in case of error
+    outlier_geoms <- 'WARNING -> outlier algorithm crashed!!!'
+    message('WARNING: Outlier detection algorithm crashed!!! Skipped...')
+    
+    # return original dataframe and error message
+    return(list(df_tr,outlier_geoms))
+  })
 }
 
 
